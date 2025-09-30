@@ -22,8 +22,14 @@ use OC\Core\Listener\AddMissingPrimaryKeyListener;
 use OC\Core\Listener\BeforeTemplateRenderedListener;
 use OC\Core\Listener\PasswordUpdatedListener;
 use OC\Core\Notification\CoreNotifier;
+use OC\Core\Sharing\Feature\ExpirationShareFeature;
+use OC\Core\Sharing\Feature\LabelShareFeature;
+use OC\Core\Sharing\Feature\NoteShareFeature;
+use OC\Core\Sharing\RecipientType\GroupShareRecipientType;
+use OC\Core\Sharing\RecipientType\UserShareRecipientType;
 use OC\OCM\OCMDiscoveryHandler;
 use OC\TagManager;
+use OCA\Sharing\Registry;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -32,6 +38,7 @@ use OCP\AppFramework\Http\Events\BeforeLoginTemplateRenderedEvent;
 use OCP\AppFramework\Http\Events\BeforeTemplateRenderedEvent;
 use OCP\DB\Events\AddMissingIndicesEvent;
 use OCP\DB\Events\AddMissingPrimaryKeyEvent;
+use OCP\Server;
 use OCP\User\Events\BeforeUserDeletedEvent;
 use OCP\User\Events\PasswordUpdatedEvent;
 use OCP\User\Events\UserDeletedEvent;
@@ -88,6 +95,14 @@ class Application extends App implements IBootstrap {
 
 		$context->registerWellKnownHandler(OCMDiscoveryHandler::class);
 		$context->registerCapability(Capabilities::class);
+
+		$registry = Server::get(Registry::class);
+		$registry->registerRecipientType(new GroupShareRecipientType());
+		$registry->registerRecipientType(new UserShareRecipientType());
+		$registry->registerFeature(new ExpirationShareFeature());
+		$registry->registerFeature(new LabelShareFeature());
+		$registry->registerFeature(new NoteShareFeature());
+
 	}
 
 	public function boot(IBootContext $context): void {

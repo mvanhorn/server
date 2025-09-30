@@ -95,4 +95,5 @@ return array(
     'OCA\\Files\\Service\\ViewConfig' => $baseDir . '/../lib/Service/ViewConfig.php',
     'OCA\\Files\\Settings\\AdminSettings' => $baseDir . '/../lib/Settings/AdminSettings.php',
     'OCA\\Files\\Settings\\PersonalSettings' => $baseDir . '/../lib/Settings/PersonalSettings.php',
+    'OCA\\Files\\Sharing\\SourceType\\NodeShareSourceType' => $baseDir . '/../lib/Sharing/SourceType/NodeShareSourceType.php',
 );

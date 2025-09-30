@@ -30,6 +30,8 @@ use OCA\Files\Search\FilesSearchProvider;
 use OCA\Files\Service\TagService;
 use OCA\Files\Service\UserConfig;
 use OCA\Files\Service\ViewConfig;
+use OCA\Files\Sharing\SourceType\NodeShareSourceType;
+use OCA\Sharing\Registry;
 use OCP\Activity\IManager as IActivityManager;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -52,6 +54,7 @@ use OCP\IRequest;
 use OCP\IServerContainer;
 use OCP\ITagManager;
 use OCP\IUserSession;
+use OCP\Server;
 use OCP\Share\IManager as IShareManager;
 use OCP\Util;
 use Psr\Container\ContainerInterface;
@@ -128,6 +131,7 @@ class Application extends App implements IBootstrap {
 
 		$context->registerConfigLexicon(ConfigLexicon::class);
 
+		Server::get(Registry::class)->registerSourceType(new NodeShareSourceType());
 	}
 
 	public function boot(IBootContext $context): void {

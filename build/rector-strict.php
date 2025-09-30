@@ -24,6 +24,11 @@ return (require __DIR__ . '/rector-shared.php')
 		$nextcloudDir . '/build/psalm/ITypedQueryBuilderTest.php',
 		$nextcloudDir . '/lib/private/DB/QueryBuilder/TypedQueryBuilder.php',
 		$nextcloudDir . '/lib/public/DB/QueryBuilder/ITypedQueryBuilder.php',
+		$nextcloudDir . '/apps/files/lib/Sharing',
+		$nextcloudDir . '/apps/files/tests/Sharing',
+		$nextcloudDir . '/apps/sharing',
+		$nextcloudDir . '/core/Sharing',
+		$nextcloudDir . '/tests/Core/Sharing',
 	])
 	->withPreparedSets(
 		deadCode: true,
