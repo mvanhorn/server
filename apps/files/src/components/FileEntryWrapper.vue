@@ -16,6 +16,9 @@
 		:is="entryComponent"
 		v-else
 		:source="source"
+		:isMimeAvailable="isMimeAvailable"
+		:isSizeAvailable="isSizeAvailable"
+		:isMtimeAvailable="isMtimeAvailable"
 		:class="{ 'files-list__row--group-child': isGroupChild }"
 		v-bind="$attrs" />
 </template>
