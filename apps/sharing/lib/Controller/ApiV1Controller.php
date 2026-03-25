@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OCA\Sharing\Controller;
 
+use OCA\Sharing\Exception\ShareConflictException;
 use OCA\Sharing\Exception\ShareInvalidException;
 use OCA\Sharing\Exception\ShareInvalidOperationParameterException;
 use OCA\Sharing\Exception\ShareNotFoundException;
@@ -31,10 +32,10 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 use OCP\IUserSession;
-use OCP\Snowflake\ISnowflakeGenerator;
 
 // TODO: Rate limit recipients during share create and update
 // TODO: Add federation
+
 /**
  * @psalm-import-type SharingShare from ResponseDefinitions
  * @psalm-import-type SharingPartialShare from ResponseDefinitions
@@ -47,7 +48,6 @@ class ApiV1Controller extends OCSController {
 		IRequest $request,
 		private readonly IUserSession $userSession,
 		private readonly Manager $manager,
-		private readonly ISnowflakeGenerator $snowflakeGenerator,
 	) {
 		parent::__construct($appName, $request);
 	}
@@ -116,8 +116,7 @@ class ApiV1Controller extends OCSController {
 			return new DataResponse('Not logged in', Http::STATUS_UNAUTHORIZED);
 		}
 
-		$data['id'] = $this->snowflakeGenerator->nextId();
-		$share = Share::fromArray($data);
+		$share = Share::fromArray($this->manager->completePartialShareData($data));
 
 		try {
 			$this->manager->insert($share);
@@ -197,11 +196,12 @@ class ApiV1Controller extends OCSController {
 	 *
 	 * @param non-empty-string $id ID of the share
 	 * @param SharingShare $data The updated share data
-	 * @return DataResponse<Http::STATUS_OK, SharingShare, array{}>|DataResponse<Http::STATUS_BAD_REQUEST|Http::STATUS_UNAUTHORIZED|Http::STATUS_NOT_FOUND, string, array{}>
+	 * @return DataResponse<Http::STATUS_OK, SharingShare, array{}>|DataResponse<Http::STATUS_BAD_REQUEST|Http::STATUS_UNAUTHORIZED|Http::STATUS_NOT_FOUND|Http::STATUS_CONFLICT, string, array{}>
 	 *
 	 * 200: Share updated
 	 * 400: Invalid share data
 	 * 404: Share not found
+	 * 409: The share has been updated in the meantime, so you cannot update it.
 	 */
 	#[UserRateLimit(limit: 1, period: 1)]
 	#[NoAdminRequired]
@@ -224,7 +224,11 @@ class ApiV1Controller extends OCSController {
 			return new DataResponse($e->getMessage(), Http::STATUS_BAD_REQUEST);
 		} catch (ShareNotFoundException $e) {
 			return new DataResponse($e->getMessage(), Http::STATUS_NOT_FOUND);
+		} catch (ShareConflictException $e) {
+			return new DataResponse($e->getMessage(), Http::STATUS_CONFLICT);
 		}
+
+		$share = $this->manager->get(new ShareAccessContext($user), $share->id);
 
 		return new DataResponse($share->toArray());
 	}

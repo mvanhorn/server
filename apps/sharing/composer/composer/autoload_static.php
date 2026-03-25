@@ -30,6 +30,7 @@ class ComposerStaticInitSharing
         'OCA\\Sharing\\Command\\Update' => __DIR__ . '/..' . '/../lib/Command/Update.php',
         'OCA\\Sharing\\Controller\\ApiV1Controller' => __DIR__ . '/..' . '/../lib/Controller/ApiV1Controller.php',
         'OCA\\Sharing\\Exception\\AShareException' => __DIR__ . '/..' . '/../lib/Exception/AShareException.php',
+        'OCA\\Sharing\\Exception\\ShareConflictException' => __DIR__ . '/..' . '/../lib/Exception/ShareConflictException.php',
         'OCA\\Sharing\\Exception\\ShareInvalidException' => __DIR__ . '/..' . '/../lib/Exception/ShareInvalidException.php',
         'OCA\\Sharing\\Exception\\ShareInvalidOperationParameterException' => __DIR__ . '/..' . '/../lib/Exception/ShareInvalidOperationParameterException.php',
         'OCA\\Sharing\\Exception\\ShareInvalidPropertiesException' => __DIR__ . '/..' . '/../lib/Exception/ShareInvalidPropertiesException.php',

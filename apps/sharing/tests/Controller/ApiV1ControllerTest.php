@@ -63,10 +63,12 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_NO_CONTENT, $response->getStatus(), var_export($responseData, true));
 	}
 
-	protected function updateShare(array $data): void {
+	protected function updateShare(array $data): array {
 		$response = $this->controller->updateShare($data['id'], $data);
+		/** @var SharingShare $responseData */
 		$responseData = $response->getData();
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
+		return $responseData;
 	}
 
 	public function testSearchRecipients(): void {
@@ -175,6 +177,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertArrayHasKey('id', $responseData);
 		$id = $responseData['id'];
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data, $responseData);
 
 		self::logout();
@@ -185,6 +189,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
 		$this->assertArrayHasKey('id', $responseData);
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data, $responseData);
 	}
 
@@ -208,6 +214,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertArrayHasKey('id', $responseData);
 		$id = $responseData['id'];
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data, $responseData);
 
 		self::logout();
@@ -223,6 +231,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
 		$this->assertArrayHasKey('id', $responseData);
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data, $responseData);
 	}
 
@@ -247,6 +257,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertArrayHasKey('id', $responseData);
 		$id = $responseData['id'];
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data, $responseData);
 
 		self::logout();
@@ -278,6 +290,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertArrayHasKey('id', $responseData);
 		$id = $responseData['id'];
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data, $responseData);
 
 		self::logout();
@@ -288,17 +302,24 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
 		$this->assertArrayHasKey('id', $responseData);
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		$lastUpdated = $responseData['last_updated'];
+		unset($responseData['last_updated']);
 		$this->assertEquals($data, $responseData);
 
 		self::loginAsUser($this->owner1->getUID());
 
 		$data['id'] = $id;
+		$data['last_updated'] = $lastUpdated;
 		$data['properties'] = [TestShareFeatureFilter::class => ['filtered' => ['true']]];
 		$response = $this->controller->updateShare($id, $data);
 		/** @var SharingShare $responseData */
 		$responseData = $response->getData();
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
 		$this->assertArrayHasKey('id', $responseData);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
+		unset($data['last_updated']);
 		$this->assertEquals($data, $responseData);
 
 		self::logout();
@@ -330,6 +351,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertArrayHasKey('id', $responseData);
 		$id = $responseData['id'];
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data, $responseData);
 
 		self::logout();
@@ -345,6 +368,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
 		$this->assertArrayHasKey('id', $responseData);
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data, $responseData);
 	}
 
@@ -400,6 +425,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_CREATED, $response->getStatus(), var_export($responseData, true));
 		$this->assertArrayHasKey('id', $responseData);
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data1, $responseData);
 
 		$data2 = [
@@ -446,6 +473,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_CREATED, $response->getStatus(), var_export($responseData, true));
 		$this->assertArrayHasKey('id', $responseData);
 		unset($responseData['id']);
+		$this->assertArrayHasKey('last_updated', $responseData);
+		unset($responseData['last_updated']);
 		$this->assertEquals($data2, $responseData);
 
 		$response = $this->controller->getShares();
@@ -454,8 +483,10 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
 		$this->assertCount(2, $responseData);
 		$this->assertArrayHasKey('id', $responseData[0]);
+		$this->assertArrayHasKey('last_updated', $responseData[0]);
 		$this->assertArrayHasKey('id', $responseData[1]);
-		unset($responseData[0]['id'], $responseData[1]['id']);
+		$this->assertArrayHasKey('last_updated', $responseData[1]);
+		unset($responseData[0]['id'], $responseData[0]['last_updated'], $responseData[1]['id'], $responseData[1]['last_updated']);
 		$this->assertEquals($data1, $responseData[0]);
 		$this->assertEquals($data2, $responseData[1]);
 
@@ -465,8 +496,10 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
 		$this->assertCount(2, $responseData);
 		$this->assertArrayHasKey('id', $responseData[0]);
+		$this->assertArrayHasKey('last_updated', $responseData[0]);
 		$this->assertArrayHasKey('id', $responseData[1]);
-		unset($responseData[0]['id'], $responseData[1]['id']);
+		$this->assertArrayHasKey('last_updated', $responseData[1]);
+		unset($responseData[0]['id'], $responseData[0]['last_updated'], $responseData[1]['id'], $responseData[1]['last_updated']);
 		$this->assertEquals($data1, $responseData[0]);
 		$this->assertEquals($data2, $responseData[1]);
 
@@ -483,8 +516,9 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
 		$this->assertCount(1, $responseData);
 		$this->assertArrayHasKey('id', $responseData[0]);
+		$this->assertArrayHasKey('last_updated', $responseData[0]);
 		$lastShareId = $responseData[0]['id'];
-		unset($responseData[0]['id']);
+		unset($responseData[0]['id'], $responseData[0]['last_updated']);
 		$this->assertEquals($data1, $responseData[0]);
 
 		$response = $this->controller->getShares(lastShareId: $lastShareId);
@@ -493,7 +527,8 @@ class ApiV1ControllerTest extends AbstractApiTests {
 		$this->assertEquals(Http::STATUS_OK, $response->getStatus(), var_export($responseData, true));
 		$this->assertCount(1, $responseData);
 		$this->assertArrayHasKey('id', $responseData[0]);
-		unset($responseData[0]['id']);
+		$this->assertArrayHasKey('last_updated', $responseData[0]);
+		unset($responseData[0]['id'], $responseData[0]['last_updated']);
 		$this->assertEquals($data2, $responseData[0]);
 	}
 }

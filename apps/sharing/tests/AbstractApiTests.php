@@ -18,7 +18,6 @@ use OCA\Sharing\ResponseDefinitions;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\Server;
-use OCP\Snowflake\ISnowflakeGenerator;
 use PHPUnit\Framework\Attributes\Group;
 use Test\TestCase;
 
@@ -56,9 +55,8 @@ abstract class AbstractApiTests extends TestCase {
 	}
 
 	protected function tearDown(): void {
-		$manager = Server::get(Manager::class);
-		foreach ($manager->list(new ShareAccessContext(force: true), null, null, null) as $share) {
-			$manager->delete(new ShareAccessContext(force: true), $share->id);
+		foreach ($this->manager->list(new ShareAccessContext(force: true), null, null, null) as $share) {
+			$this->manager->delete(new ShareAccessContext(force: true), $share->id);
 		}
 
 		$this->registry->clear();
@@ -174,6 +172,8 @@ abstract class AbstractApiTests extends TestCase {
 		$response = $this->createShare($data);
 		$this->assertArrayHasKey('id', $response);
 		unset($response['id']);
+		$this->assertArrayHasKey('last_updated', $response);
+		unset($response['last_updated']);
 		$this->assertEquals($this->getShareDataWithDisplayNames(), $response);
 	}
 
@@ -186,13 +186,14 @@ abstract class AbstractApiTests extends TestCase {
 	public function testGetShare(): void {
 		$this->register();
 
-		$data = $this->getShareData();
-		$data['id'] = Server::get(ISnowflakeGenerator::class)->nextId();
+		$data = $this->manager->completePartialShareData($this->getShareData());
 		$this->manager->insert(Share::fromArray($data));
 
 		$response = $this->getShare($data['id']);
 		$this->assertArrayHasKey('id', $response);
 		unset($response['id']);
+		$this->assertArrayHasKey('last_updated', $response);
+		unset($response['last_updated']);
 		$this->assertEquals($this->getShareDataWithDisplayNames(), $response);
 	}
 
@@ -204,8 +205,7 @@ abstract class AbstractApiTests extends TestCase {
 	public function testDeleteShare(): void {
 		$this->register();
 
-		$data = $this->getShareData();
-		$data['id'] = Server::get(ISnowflakeGenerator::class)->nextId();
+		$data = $this->manager->completePartialShareData($this->getShareData());
 		$this->manager->insert(Share::fromArray($data));
 
 		$this->deleteShare($data['id']);
@@ -216,14 +216,14 @@ abstract class AbstractApiTests extends TestCase {
 
 	/**
 	 * @param SharingShare $data
+	 * @return SharingShare
 	 */
-	abstract protected function updateShare(array $data): void;
+	abstract protected function updateShare(array $data): array;
 
 	public function testUpdateShare(): void {
 		$this->register();
 
 		$data = [
-			'id' => Server::get(ISnowflakeGenerator::class)->nextId(),
 			'owner' => [
 				'user_id' => $this->owner1->getUID(),
 			],
@@ -231,17 +231,23 @@ abstract class AbstractApiTests extends TestCase {
 			'recipients' => [['type' => TestShareRecipientType::class, 'value' => 'recipient1']],
 			'properties' => [TestShareFeature::class => ['key1' => ['key1']]],
 		];
-		Server::get(Manager::class)->insert(Share::fromArray($data));
+		$data = $this->manager->completePartialShareData($data);
+
+		$this->manager->insert(Share::fromArray($data));
+		$response = $this->manager->get(new ShareAccessContext(force: true), $data['id'])->toArray();
+		$this->assertArrayHasKey('last_updated', $response);
+		$lastUpdated = $response['last_updated'];
 
 		$data['owner'] = ['user_id' => $this->owner2->getUID()];
 		$data['sources'] = [['type' => TestShareSourceType2::class, 'value' => 'source2']];
 		$data['recipients'] = [['type' => TestShareRecipientType2::class, 'value' => 'recipient2']];
 		$data['properties'] = [TestShareFeature2::class => ['key2' => ['value2']]];
-		$this->updateShare($data);
-
-		$response = $this->manager->get(new ShareAccessContext(force: true), $data['id'])->toArray();
+		$response = $this->updateShare($data);
 		$this->assertArrayHasKey('id', $response);
 		unset($response['id']);
+		$this->assertArrayHasKey('last_updated', $response);
+		$this->assertGreaterThan($lastUpdated, $response['last_updated']);
+		unset($response['last_updated']);
 
 		$this->assertEquals([
 			'owner' => [

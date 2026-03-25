@@ -86,7 +86,7 @@ class CommandTest extends AbstractApiTests {
 		$this->assertEquals(0, $exitCode);
 	}
 
-	protected function updateShare(array $data): void {
+	protected function updateShare(array $data): array {
 		$this->input
 			->expects($this->once())
 			->method('getArgument')
@@ -95,5 +95,10 @@ class CommandTest extends AbstractApiTests {
 
 		$exitCode = Server::get(Update::class)->execute($this->input, $this->output);
 		$this->assertEquals(0, $exitCode);
+
+		/** @var SharingShare $out */
+		$out = json_decode($this->stdout, true, 512, JSON_THROW_ON_ERROR);
+
+		return $out;
 	}
 }

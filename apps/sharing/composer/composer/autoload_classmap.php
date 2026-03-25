@@ -15,6 +15,7 @@ return array(
     'OCA\\Sharing\\Command\\Update' => $baseDir . '/../lib/Command/Update.php',
     'OCA\\Sharing\\Controller\\ApiV1Controller' => $baseDir . '/../lib/Controller/ApiV1Controller.php',
     'OCA\\Sharing\\Exception\\AShareException' => $baseDir . '/../lib/Exception/AShareException.php',
+    'OCA\\Sharing\\Exception\\ShareConflictException' => $baseDir . '/../lib/Exception/ShareConflictException.php',
     'OCA\\Sharing\\Exception\\ShareInvalidException' => $baseDir . '/../lib/Exception/ShareInvalidException.php',
     'OCA\\Sharing\\Exception\\ShareInvalidOperationParameterException' => $baseDir . '/../lib/Exception/ShareInvalidOperationParameterException.php',
     'OCA\\Sharing\\Exception\\ShareInvalidPropertiesException' => $baseDir . '/../lib/Exception/ShareInvalidPropertiesException.php',

@@ -210,12 +210,19 @@
                     {
                         "type": "object",
                         "required": [
-                            "id"
+                            "id",
+                            "last_updated"
                         ],
                         "properties": {
                             "id": {
                                 "type": "string",
                                 "minLength": 1
+                            },
+                            "last_updated": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Unix time in milliseconds",
+                                "minimum": 0
                             }
                         }
                     }
@@ -938,6 +945,36 @@
                     },
                     "404": {
                         "description": "Share not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ocs"
+                                    ],
+                                    "properties": {
+                                        "ocs": {
+                                            "type": "object",
+                                            "required": [
+                                                "meta",
+                                                "data"
+                                            ],
+                                            "properties": {
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/OCSMeta"
+                                                },
+                                                "data": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "The share has been updated in the meantime, so you cannot update it.",
                         "content": {
                             "application/json": {
                                 "schema": {

@@ -48,6 +48,14 @@ class Update extends Command {
 			return 1;
 		}
 
+		try {
+			$share = $this->manager->get(new ShareAccessContext(force: true), $share->id);
+		} catch (AShareException $aShareException) {
+			$output->writeln($aShareException->getMessage());
+			return 1;
+		}
+
+		$output->writeln(json_encode($share->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
 		return 0;
 	}
 }
