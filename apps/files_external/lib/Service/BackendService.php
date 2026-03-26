@@ -73,12 +73,13 @@ class BackendService {
 	}
 
 	private function callForRegistrations(): void {
-		if (!$this->eventSent) {
+		$instance = Server::get(self::class);
+		if (!$instance->eventSent) {
 			Server::get(IEventDispatcher::class)->dispatch(
 				'OCA\\Files_External::loadAdditionalBackends',
 				new GenericEvent()
 			);
-			$this->eventSent = true;
+			$instance->eventSent = true;
 		}
 	}
 
