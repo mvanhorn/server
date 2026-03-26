@@ -43,9 +43,9 @@ use OCP\Template\ITemplateManager;
 use OCP\Util;
 
 class TemplateLayout {
-	private static string $versionHash = '';
+	private string $versionHash = '';
 	/** @var string[] */
-	private static array $cacheBusterCache = [];
+	private array $cacheBusterCache = [];
 
 	public ?CSSResourceLocator $cssLocator = null;
 	public ?JSResourceLocator $jsLocator = null;
@@ -211,13 +211,13 @@ class TemplateLayout {
 		$page->assign('enabledThemes', $themesService?->getEnabledThemes() ?? []);
 
 		if ($this->config->getSystemValueBool('installed', false)) {
-			if (empty(self::$versionHash)) {
+			if (empty($this->versionHash)) {
 				$v = $this->appManager->getAppInstalledVersions(true);
 				$v['core'] = implode('.', $this->serverVersion->getVersion());
-				self::$versionHash = substr(md5(implode(',', $v)), 0, 8);
+				$this->versionHash = substr(md5(implode(',', $v)), 0, 8);
 			}
 		} else {
-			self::$versionHash = md5('not installed');
+			$this->versionHash = md5('not installed');
 		}
 
 		// Add the js files
@@ -247,7 +247,7 @@ class TemplateLayout {
 			if (Server::get(ContentSecurityPolicyNonceManager::class)->browserSupportsCspV3()) {
 				$page->assign('inline_ocjs', $config);
 			} else {
-				$page->append('jsfiles', Server::get(IURLGenerator::class)->linkToRoute('core.OCJS.getConfig', ['v' => self::$versionHash]));
+				$page->append('jsfiles', Server::get(IURLGenerator::class)->linkToRoute('core.OCJS.getConfig', ['v' => $this->versionHash]));
 			}
 		}
 		foreach ($jsFiles as $info) {
@@ -280,7 +280,7 @@ class TemplateLayout {
 
 		$page->assign('cssfiles', []);
 		$page->assign('printcssfiles', []);
-		$this->initialState->provideInitialState('core', 'versionHash', self::$versionHash);
+		$this->initialState->provideInitialState('core', 'versionHash', $this->versionHash);
 		foreach ($cssFiles as $info) {
 			$web = $info[1];
 			$file = $info[2];
@@ -320,7 +320,7 @@ class TemplateLayout {
 
 		if ($this->config->getSystemValueBool('installed', false) === false) {
 			// if not installed just return the version hash
-			return '?v=' . self::$versionHash;
+			return '?v=' . $this->versionHash;
 		}
 
 		$hash = false;
@@ -334,7 +334,7 @@ class TemplateLayout {
 		}
 		// As a last resort we use the server version hash
 		if ($hash === false) {
-			$hash = self::$versionHash;
+			$hash = $this->versionHash;
 		}
 
 		// The theming app is force-enabled thus the cache buster is always available
@@ -344,7 +344,7 @@ class TemplateLayout {
 	}
 
 	private function getVersionHashByPath(string $path): string|false {
-		if (array_key_exists($path, self::$cacheBusterCache) === false) {
+		if (array_key_exists($path, $this->cacheBusterCache) === false) {
 			// Not yet cached, so lets find the cache buster string
 			$appId = $this->getAppNamefromPath($path);
 			if ($appId === false) {
@@ -354,20 +354,20 @@ class TemplateLayout {
 
 			if ($appId === 'core') {
 				// core is not a real app but the server itself
-				$hash = self::$versionHash;
+				$hash = $this->versionHash;
 			} else {
 				$appVersion = $this->appManager->getAppVersion($appId);
 				// For shipped apps the app version is not a single source of truth, we rather also need to consider the Nextcloud version
 				if ($this->appManager->isShipped($appId)) {
-					$appVersion .= '-' . self::$versionHash;
+					$appVersion .= '-' . $this->versionHash;
 				}
 
 				$hash = substr(md5($appVersion), 0, 8);
 			}
-			self::$cacheBusterCache[$path] = $hash;
+			$this->cacheBusterCache[$path] = $hash;
 		}
 
-		return self::$cacheBusterCache[$path];
+		return $this->cacheBusterCache[$path];
 	}
 
 	private function findStylesheetFiles(array $styles): array {
