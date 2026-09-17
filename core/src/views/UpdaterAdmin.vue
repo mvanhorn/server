@@ -164,12 +164,13 @@ function reloadPage() {
 		</NcNoteCard>
 
 		<NcNoteCard v-if="updateInfo.incompatibleAppsList.length" type="warning">
-			{{ t('core', 'These incompatible apps will be disabled:') }}
+			{{ t('core', 'The currently installed versions of these apps are incompatible with {productName} {version} and will be disabled during the update:', { productName: updateInfo.productName, version: updateInfo.version }) }}
 			<ul :aria-label="t('core', 'Incompatible apps')" :class="$style.updater__appsList">
 				<li v-for="app of updateInfo.incompatibleAppsList" :key="'app-disable-' + app.id">
 					{{ app.name }} ({{ app.id }})
 				</li>
 			</ul>
+			{{ t('core', '{productName} will attempt to install compatible app updates and re-enable the apps. Apps without a successful compatible update will remain disabled.', { productName: updateInfo.productName }) }}
 		</NcNoteCard>
 
 		<NcNoteCard v-if="updateInfo.incompatibleAppsList.length" type="info">
